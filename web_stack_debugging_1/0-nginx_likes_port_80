@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # Install Nginx if not installed
-apt update && apt install -y nginx
 
 # Modify default site config to listen on port 80 for both IPv4 and IPv6
 sed -i 's/listen\s\+[0-9]* default_server;/listen 80 default_server;/' /etc/nginx/sites-available/default
