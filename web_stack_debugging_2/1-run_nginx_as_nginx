@@ -5,7 +5,7 @@
 set -e
 
 # Install nginx if not already installed
-apt update && apt install -y nginx
+# apt update && apt install -y nginx
 
 # Create nginx user if it doesn't exist
 if ! id -u nginx >/dev/null 2>&1; then
