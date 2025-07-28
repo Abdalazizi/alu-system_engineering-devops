@@ -1,26 +1,30 @@
 #!/usr/bin/env bash
-# Configures Nginx to run as nginx user and listen on port 8080 on all interfaces
+# This script configures Nginx to:
+# - Run as the 'nginx' user
+# - Listen on all active IPs on port 8080
+# - Not remove any packages
 
-# Exit immediately if a command exits with a non-zero status
 set -e
 
-# Install nginx if not already installed
-# apt update && apt install -y nginx
-
-# Create nginx user if it doesn't exist
+# Step 1: Create 'nginx' user if it doesn't exist
 if ! id -u nginx >/dev/null 2>&1; then
   useradd -r -s /sbin/nologin nginx
 fi
 
-# Change ownership of nginx directories to nginx user
-chown -R nginx:nginx /var/log/nginx /var/lib/nginx /var/www/html
-
-# Change Nginx config to run as nginx user
+# Step 2: Set Nginx to run as nginx user
 sed -i 's/^user .*/user nginx;/' /etc/nginx/nginx.conf
 
-# Update site config to listen on port 8080
+# Step 3: Update site config to listen on port 8080
 sed -i 's/listen 80 default_server;/listen 8080 default_server;/' /etc/nginx/sites-available/default
 sed -i 's/listen \[::\]:80 default_server;/listen [::]:8080 default_server;/' /etc/nginx/sites-available/default
 
-# Restart Nginx
+# Step 4: Ensure correct ownership of web and log directories
+chown -R nginx:nginx /var/www/html /var/log/nginx /var/lib/nginx
+
+# Step 5: Stop any conflicting service like apache2 without using apt-get remove
+fuser -k 8080/tcp || pkill -f ":8080"
+
+# pkill -9 apache2 || true
+
+# Step 6: Restart Nginx
 service nginx restart
