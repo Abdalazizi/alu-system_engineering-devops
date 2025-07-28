@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Configures Nginx to run as nginx user and listen on port 8080 on all interfaces
 
+# Update package info and install nginx if not present
 apt update && apt install -y nginx
 
 # Change Nginx user to 'nginx' in nginx.conf
