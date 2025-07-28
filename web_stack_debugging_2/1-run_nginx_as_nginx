@@ -4,6 +4,7 @@
 # Update package info and install nginx if not present
 apt update && apt install -y nginx
 
+sudo useradd -r -s /sbin/nologin nginxuser
 # Change Nginx user to 'nginx' in nginx.conf
 sed -i 's/^user .*/user nginx;/' /etc/nginx/nginx.conf
 
