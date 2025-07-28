@@ -1,33 +1,15 @@
 #!/usr/bin/env bash
-# Securely configure Nginx to run as nginx user on port 8080
+# Configures Nginx to run as nginx user and listen on port 8080 on all interfaces
 
-# Exit on error
-set -e
+# Update package info and install nginx if not present
+apt update && apt install -y nginx
 
-# Step 1: Ensure nginx user exists
-if ! id nginx >/dev/null 2>&1; then
-  useradd -r -s /usr/sbin/nologin nginx
-fi
+# Change Nginx user to 'nginx' in nginx.conf
+sed -i 's/^user .*/user nginx;/' /etc/nginx/nginx.conf
 
-# Step 2: Install Nginx if not already installed
-apt update -y
-apt install -y nginx
-
-# Step 3: Change user in main nginx.conf
-if grep -q "^user" /etc/nginx/nginx.conf; then
-  sed -i 's/^user .*/user nginx;/' /etc/nginx/nginx.conf
-else
-  sed -i '1iuser nginx;' /etc/nginx/nginx.conf
-fi
-
-# Step 4: Change port in site config to 8080
+# Update default site config to listen on port 8080 (IPv4 and IPv6)
 sed -i 's/listen 80 default_server;/listen 8080 default_server;/' /etc/nginx/sites-available/default
 sed -i 's/listen \[::\]:80 default_server;/listen [::]:8080 default_server;/' /etc/nginx/sites-available/default
 
-# Step 5: Fix permissions so nginx user can access logs and cache
-chown -R nginx:nginx /var/log/nginx
-chown -R nginx:nginx /var/cache/nginx
-
-# Step 6: Test config and restart Nginx
-nginx -t
+# Restart nginx to apply changes
 service nginx restart
