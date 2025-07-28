@@ -1,44 +1,13 @@
 #!/usr/bin/env bash
-# Install Nginx if not already installed
-apt update && apt install -y nginx
+# Installs and configures Nginx to listen on port 80 (IPv4 and IPv6)
 
-# Configure Nginx to listen on port 80 for both IPv4 and IPv6
-sed -i 's/listen\s\+[0-9]* default_server;/listen 80 default_server;/' /etc/nginx/sites-available/default
-sed -i 's/listen\s\+\[::\]:[0-9]* default_server;/listen [::]:80 default_server;/' /etc/nginx/sites-available/default
+# Update and install Nginx silently
+apt-get update -y >/dev/null 2>&1
+apt-get install -y nginx >/dev/null 2>&1
 
-# If either listen directive is missing entirely, insert them
-grep -q "listen 80 default_server;" /etc/nginx/sites-available/default || \
-    sed -i '/server {/a \    listen 80 default_server;' /etc/nginx/sites-available/default
+# Configure Nginx to listen on port 80 (IPv4 and IPv6)
+sed -i 's/listen [0-9]* default_server;/listen 80 default_server;/' /etc/nginx/sites-available/default >/dev/null 2>&1
+sed -i 's/listen \[::\]:[0-9]* default_server;/listen [::]:80 default_server;/' /etc/nginx/sites-available/default >/dev/null 2>&1
 
-grep -q "listen [::]:80 default_server;" /etc/nginx/sites-available/default || \
-    sed -i '/server {/a \    listen [::]:80 default_server;' /etc/nginx/sites-available/default
-
-# Restart Nginx using service
-service nginx restart
-
-# Validate that both IPv4 and IPv6 listeners are active on port 80
-LISTEN_COUNT=$(ss -tuln | grep -cE '(^| ):::80|(^| )0\.0\.0\.0:80')
-
-echo "Listeners on port 80: $LISTEN_COUNT"
-
-# Must be 2 (IPv4 + IPv6)
-if [ "$LISTEN_COUNT" -eq 2 ]; then
-  echo "✅ Nginx is listening on both IPv4 and IPv6 on port 80"
-  exit 0
-else
-  echo "❌ Expected 2 listeners on port 80, but got $LISTEN_COUNT"
-  exit 1
-fi
-
-
-# #!/usr/bin/env bash
-# # Install Nginx if not installed
-
-# # Modify default site config to listen on port 80 for both IPv4 and IPv6
-# sed -i 's/listen\s\+[0-9]* default_server;/listen 80 default_server;/' /etc/nginx/sites-available/default
-# sed -i 's/listen\s\+\[::\]:[0-9]* default_server;/listen [::]:80 default_server;/' /etc/nginx/sites-available/default
-
-# # Restart Nginx using service
-# service nginx restart
-
-
+# Restart nginx silently
+service nginx restart >/dev/null 2>&1
