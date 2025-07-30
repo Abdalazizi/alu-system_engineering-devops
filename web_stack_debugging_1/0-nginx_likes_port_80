@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
-# Installs and configures Nginx to listen on port 80 (IPv4 and IPv6)
+# Configures NGINX to listen on port 80 and restart the service
 
-# Update and install Nginx silently
-apt-get update -y >/dev/null 2>&1
-apt-get install -y nginx >/dev/null 2>&1
+rm -f /etc/nginx/sites-enabled/default
 
-# Configure Nginx to listen on port 80 (IPv4 and IPv6)
-sed -i 's/listen [0-9]* default_server;/listen 80 default_server;/' /etc/nginx/sites-available/default >/dev/null 2>&1
-sed -i 's/listen \[::\]:[0-9]* default_server;/listen [::]:80 default_server;/' /etc/nginx/sites-available/default >/dev/null 2>&1
+# Go to sites-enabled directory
+cd /etc/nginx/sites-enabled/
 
-# Restart nginx silently
-service nginx restart >/dev/null 2>&1
+# Recreate symbolic link to sites-available/default
+ln -s ../sites-available/default .
+
+# Restart nginx service
+service nginx restart
+
+# Test if nginx is responding on port 80
+curl -s 0:80
