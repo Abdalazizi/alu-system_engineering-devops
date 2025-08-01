@@ -27,7 +27,7 @@ for file in "$DIR"/*; do
     chmod +x "$file"
     git add .
     git commit -m "made $file executable"
-    it push
+    git push
     echo "Made '$file' executable."
   fi
 done
